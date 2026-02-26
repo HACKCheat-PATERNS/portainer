@@ -223,7 +223,7 @@ func (handler *Handler) updateComposeStack(tx dataservices.DataStoreTx, r *http.
 	// Handle webhook
 	if payload.Webhook != "" {
 		if stack.AutoUpdate == nil || stack.AutoUpdate.Webhook != payload.Webhook {
-			isUnique, err := handler.checkUniqueWebhookID(payload.Webhook)
+			isUnique, err := handler.checkUniqueWebhookID(tx, payload.Webhook)
 			if err != nil {
 				return httperror.InternalServerError("Unable to check for webhook ID collision", err)
 			}
@@ -282,7 +282,9 @@ func (handler *Handler) updateComposeStack(tx dataservices.DataStoreTx, r *http.
 		return httperror.InternalServerError(err.Error(), err)
 	}
 
-	handler.FileService.RemoveStackFileBackup(stackFolder, stack.EntryPoint)
+	if err := handler.FileService.RemoveStackFileBackup(stackFolder, stack.EntryPoint); err != nil {
+		log.Warn().Err(err).Msg("remove stack file backup error")
+	}
 
 	return nil
 }
@@ -306,7 +308,7 @@ func (handler *Handler) updateSwarmStack(tx dataservices.DataStoreTx, r *http.Re
 	// Handle webhook
 	if payload.Webhook != "" {
 		if stack.AutoUpdate == nil || stack.AutoUpdate.Webhook != payload.Webhook {
-			isUnique, err := handler.checkUniqueWebhookID(payload.Webhook)
+			isUnique, err := handler.checkUniqueWebhookID(tx, payload.Webhook)
 			if err != nil {
 				return httperror.InternalServerError("Unable to check for webhook ID collision", err)
 			}
@@ -373,7 +375,9 @@ func (handler *Handler) updateSwarmStack(tx dataservices.DataStoreTx, r *http.Re
 		return httperror.InternalServerError(err.Error(), err)
 	}
 
-	handler.FileService.RemoveStackFileBackup(stackFolder, stack.EntryPoint)
+	if err := handler.FileService.RemoveStackFileBackup(stackFolder, stack.EntryPoint); err != nil {
+		log.Warn().Err(err).Msg("remove stack file backup error")
+	}
 
 	return nil
 }
